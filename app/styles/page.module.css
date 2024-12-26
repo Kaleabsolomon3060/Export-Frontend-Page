@@ -1,0 +1,11 @@
+.main {
+  @apply min-h-screen flex flex-col;
+}
+
+.hero {
+  @apply relative overflow-hidden bg-gradient-to-br from-blue-50 to-white;
+}
+
+.content {
+  @apply relative z-10 py-16;
+} 

@@ -3,19 +3,231 @@
 @tailwind utilities;
 
 :root {
+  --foreground: #000000;
   --background: #ffffff;
-  --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply text-gray-900 bg-gray-50;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+/* Add responsive utilities */
+@layer utilities {
+  .hamburger-line {
+    @apply w-6 h-0.5 bg-gray-600 transition-all duration-300;
+  }
+  
+  .hamburger-active .hamburger-line:nth-child(1) {
+    @apply rotate-45 translate-y-1.5;
+  }
+  
+  .hamburger-active .hamburger-line:nth-child(2) {
+    @apply opacity-0;
+  }
+  
+  .hamburger-active .hamburger-line:nth-child(3) {
+    @apply -rotate-45 -translate-y-1.5;
+  }
+
+  .menu-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-40;
+  }
+
+  .menu-container {
+    @apply fixed top-0 right-0 h-full w-64 bg-white shadow-xl z-50 transform transition-transform duration-300;
+  }
+
+  .menu-enter {
+    @apply translate-x-full;
+  }
+
+  .menu-enter-active {
+    @apply translate-x-0;
+  }
+
+  .menu-exit {
+    @apply translate-x-0;
+  }
+
+  .menu-exit-active {
+    @apply translate-x-full;
+  }
+
+  .no-scroll {
+    @apply overflow-hidden;
+  }
+
+  .hover-lift {
+    @apply transition-hover duration-300 ease-out hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 ease-out hover:shadow-[0_0_20px_rgba(59,130,246,0.3)];
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-300 ease-out hover:scale-105;
+  }
+
+  .hover-border {
+    @apply transition-colors duration-300 ease-out hover:border-blue-500;
+  }
+
+  .hover-bg-gradient {
+    @apply relative overflow-hidden transition-all duration-300 
+           before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-600/0 before:to-blue-600/0 before:transition-all
+           hover:before:from-blue-600/5 hover:before:to-blue-600/10;
+  }
+} 
+
+/* Add smooth scrolling to the whole page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 640px) {
+  button, a {
+    @apply min-h-[44px] min-w-[44px];
+  }
+} 
+
+/* Add smooth transitions for all interactive elements */
+@layer base {
+  a, button, input, select, textarea {
+    @apply transition-all duration-200;
+  }
+
+  /* Modern focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+  }
+
+  /* Card hover effects */
+  .card {
+    @apply hover-lift hover-glow;
+  }
+
+  /* Button hover effects */
+  .btn {
+    @apply hover-scale hover-glow;
+  }
+
+  /* Input hover effects */
+  .input-hover {
+    @apply hover-border focus:hover-glow;
+  }
+} 
