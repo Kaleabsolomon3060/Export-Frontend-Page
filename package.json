@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "rmdir /s /q .next\\cache && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

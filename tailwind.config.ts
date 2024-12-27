@@ -11,6 +11,12 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        primary: "var(--primary)",
+        secondary: "var(--secondary)",
+        muted: "var(--muted)",
+        success: "var(--success)",
+        warning: "var(--warning)",
+        error: "var(--error)",
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out forwards',

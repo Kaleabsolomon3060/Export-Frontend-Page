@@ -1,6 +1,6 @@
 'use client'
 import { createContext, useContext, useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 interface AuthContextType {
   isAuthenticated: boolean
@@ -12,6 +12,7 @@ interface AuthContextType {
 interface User {
   email: string
   name: string
+  avatar?: string
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -19,7 +20,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -32,7 +35,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('user')
       }
     }
+    setIsLoading(false)
   }, [])
+
+  useEffect(() => {
+    if (!isLoading) {
+      const publicPaths = ['/', '/login', '/signup']
+      if (!isAuthenticated && !publicPaths.includes(pathname)) {
+        router.push('/login')
+      } else if (isAuthenticated && publicPaths.includes(pathname)) {
+        router.push('/dashboard')
+      }
+    }
+  }, [isAuthenticated, pathname, isLoading, router])
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
@@ -76,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
-      {children}
+      {!isLoading && children}
     </AuthContext.Provider>
   )
 }

@@ -17,7 +17,7 @@ interface FormErrors {
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: ''
@@ -48,18 +48,12 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!validateForm()) return
     
-    if (!validateForm()) {
-      return
-    }
-
     setIsLoading(true)
-    setErrors({})
-
     try {
       await login(formData.email, formData.password)
-      // After successful login, redirect to dashboard
-      router.push('/dashboard')
+      // Login function will handle redirect
     } catch (error) {
       setErrors({
         general: 'Failed to login. Please try again.'
