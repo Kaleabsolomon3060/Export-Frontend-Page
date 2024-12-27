@@ -1,1 +1,5 @@
-# Export-Frontend-Page
+<<<<<<< HEAD
+Your local changes
+=======
+Changes from the remote branch
+>>>>>>> main
