@@ -13,6 +13,8 @@ interface User {
   email: string
   name: string
   avatar?: string
+  role: 'admin' | 'user'
+  password?: string
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -41,36 +43,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoading) {
       const publicPaths = ['/', '/login', '/signup']
+      const adminPaths = ['/admin', '/admin/dashboard']
+      
       if (!isAuthenticated && !publicPaths.includes(pathname)) {
         router.push('/login')
-      } else if (isAuthenticated && publicPaths.includes(pathname)) {
-        router.push('/dashboard')
+      } else if (isAuthenticated) {
+        const userRole = user?.role
+        
+        // Check if user is admin and on a non-admin path
+        if (userRole === 'admin' && !adminPaths.some(path => pathname.startsWith(path))) {
+          router.push('/admin/dashboard')
+        } else if (userRole === 'user' && adminPaths.some(path => pathname.startsWith(path))) {
+          router.push('/dashboard')
+        }
       }
     }
-  }, [isAuthenticated, pathname, isLoading, router])
+  }, [isAuthenticated, pathname, isLoading, router, user])
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Mock successful login
-      const userData = {
-        email,
-        name: email.split('@')[0],
+      // Check for admin credentials first
+      if (email === 'kaleab1621@gmail.com' && password === 'kbholic1621') {
+        const userData = {
+          email,
+          name: 'Kaleab',
+          role: 'admin' as const
+        }
+        setUser(userData)
+        setIsAuthenticated(true)
+        localStorage.setItem('user', JSON.stringify(userData))
+        document.cookie = `user=${JSON.stringify(userData)}; path=/; max-age=86400`
+        await router.push('/admin/dashboard')
+        return
       }
-      
-      // Store user data
-      localStorage.setItem('user', JSON.stringify(userData))
-      setUser(userData)
-      setIsAuthenticated(true)
 
-      // Set a cookie for middleware auth check
-      document.cookie = `user=${JSON.stringify(userData)}; path=/`
+      // Check for registered users
+      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]')
+      const matchedUser = registeredUsers.find((u: any) => u.email === email && u.password === password)
       
-      // Redirect to dashboard after login
-      router.push('/dashboard')
-      
+      if (matchedUser) {
+        const userData: User = {
+          email: matchedUser.email,
+          name: matchedUser.name,
+          role: matchedUser.role
+        }
+        setUser(userData)
+        setIsAuthenticated(true)
+        localStorage.setItem('user', JSON.stringify(userData))
+        document.cookie = `user=${JSON.stringify(userData)}; path=/`
+        await router.push(userData.role === 'admin' ? '/admin/dashboard' : '/dashboard')
+      } else {
+        throw new Error('Invalid credentials')
+      }
     } catch (error) {
       console.error('Login error:', error)
       throw new Error('Login failed')
