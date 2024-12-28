@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { mockSuppliers } from '@/app/data/mockData'
-import { Supplier, Farmer } from '@/app/types'
+import { Supplier } from '@/app/types'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
   const [searchTerm, setSearchTerm] = useState({ name: '', size: '' })
   const [searchResults, setSearchResults] = useState<Supplier[]>([])
+  const [selectedFarmers, setSelectedFarmers] = useState<string[]>([])
 
   const handleSearch = () => {
     const filteredResults = mockSuppliers.filter(supplier => {
@@ -32,6 +33,43 @@ export default function DashboardPage() {
     setSelectedSupplier(supplier)
     setShowSupplierDetails(true)
     setShowResults(false)
+  }
+
+  const handleFarmerSelection = (farmerId: string) => {
+    setSelectedFarmers(prev => 
+      prev.includes(farmerId) 
+        ? prev.filter(id => id !== farmerId)
+        : [...prev, farmerId]
+    )
+  }
+
+  const handleExport = () => {
+    const selectedFarmerData = selectedSupplier?.farmers.filter(farmer => 
+      selectedFarmers.includes(farmer.farmerId)
+    )
+    
+    // Create CSV content
+    const csvContent = [
+      ['Farmer ID', 'Name', 'Gender', 'Farm Size (ha)', 'Location'],
+      ...selectedFarmerData!.map(farmer => [
+        farmer.farmerId,
+        farmer.farmerName,
+        farmer.genderId === 1 ? 'Male' : 'Female',
+        farmer.farmSize.toString(),
+        `${farmer.latitude}, ${farmer.longitude}`
+      ])
+    ].map(row => row.join(',')).join('\n')
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${selectedSupplier?.name}_selected_farmers.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
   }
 
   return (
@@ -200,8 +238,8 @@ export default function DashboardPage() {
           <div className="bg-[#1a2633] border border-[#44bcd8]/30 rounded-lg p-6 w-full max-w-7xl h-[90vh]
             shadow-[0_0_25px_rgba(68,188,216,0.25)] animate-fade-in flex flex-col">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Results</h2>
-              <button onClick={() => setShowResults(false)} className="text-gray-400 hover:text-gray-500">
+              <h2 className="text-xl font-semibold text-[#44bcd8]">Supplier List</h2>
+              <button onClick={() => setShowResults(false)} className="text-[#44bcd8] hover:text-[#44bcd8]/80">
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -211,10 +249,10 @@ export default function DashboardPage() {
             <table className="min-w-full divide-y divide-[#44bcd8]/10">
               <thead className="bg-[#0c141c]/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Number</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Size</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Farmers</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Number</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Supplier</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Total Size</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Total Farmers</th>
                 </tr>
               </thead>
               <tbody className="bg-[#1a2633] divide-y divide-[#44bcd8]/10">
@@ -222,12 +260,12 @@ export default function DashboardPage() {
                   <tr 
                     key={supplier.id}
                     onClick={() => handleSupplierClick(supplier)}
-                    className="hover:bg-[#44bcd8]/5 cursor-pointer"
+                    className="hover:bg-[#44bcd8]/5 cursor-pointer transition-colors duration-200"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{index + 1}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{supplier.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{supplier.totalFarmSize} ha</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{supplier.totalFarmers}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{index + 1}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{supplier.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">{supplier.totalFarmSize} ha</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">{supplier.totalFarmers}</td>
                   </tr>
                 ))}
               </tbody>
@@ -242,43 +280,94 @@ export default function DashboardPage() {
           <div className="bg-[#1a2633] border border-[#44bcd8]/30 rounded-lg p-6 w-full max-w-7xl h-[90vh]
             shadow-[0_0_25px_rgba(68,188,216,0.25)] animate-fade-in flex flex-col">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">{selectedSupplier.name}</h2>
+              <h2 className="text-xl font-semibold text-[#44bcd8]">{selectedSupplier.name}</h2>
               <button
                 onClick={() => {
                   setShowSupplierDetails(false)
                   setSelectedSupplier(null)
+                  setShowResults(true)
                 }}
-                className="text-gray-400 hover:text-gray-500"
+                className="text-[#44bcd8] hover:text-[#44bcd8]/80"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="mt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Farmer Details</h3>
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            <div className="mt-6 flex-1 overflow-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-[#44bcd8]">Farmer Details</h3>
+                <div className="space-x-4">
+                  <button
+                    onClick={() => setSelectedFarmers([])}
+                    className="px-4 py-2 text-[#44bcd8] border border-[#44bcd8] rounded-lg
+                      hover:bg-[#44bcd8]/10 transition-colors duration-200"
+                    disabled={selectedFarmers.length === 0}
+                  >
+                    Undo All
+                  </button>
+                  <button
+                    onClick={handleExport}
+                    className="px-4 py-2 bg-[#2ecc71] text-white rounded-lg
+                      hover:bg-[#2ecc71]/90 transition-colors duration-200"
+                    disabled={selectedFarmers.length === 0}
+                  >
+                    Export Selected ({selectedFarmers.length})
+                  </button>
+                </div>
+              </div>
+              <table className="min-w-full divide-y divide-[#44bcd8]/10">
+                <thead className="bg-[#0c141c]/50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Farmer ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Farm Size</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Farmer ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Gender</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Farm Size</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Location</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Action</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {selectedSupplier.farmers.map((farmer) => (
-                    <tr key={farmer.farmerId}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{farmer.farmerId}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{farmer.farmerName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{farmer.genderId === 1 ? 'Male' : 'Female'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{farmer.farmSize} ha</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {farmer.latitude}, {farmer.longitude}
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="bg-[#1a2633] divide-y divide-[#44bcd8]/10">
+                  {selectedSupplier.farmers.map((farmer) => {
+                    const isSelected = selectedFarmers.includes(farmer.farmerId);
+                    return (
+                      <tr 
+                        key={farmer.farmerId}
+                        className={`${isSelected ? 'bg-[#2ecc71]/10' : ''} transition-colors duration-200`}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.farmerId}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white flex items-center gap-2">
+                          {farmer.farmerName}
+                          {isSelected && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#2ecc71]/20 text-[#2ecc71]">
+                              Selected
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">
+                          {farmer.genderId === 1 ? 'Male' : 'Female'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">
+                          {farmer.farmSize} ha
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">
+                          {farmer.latitude}, {farmer.longitude}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <button
+                            onClick={() => handleFarmerSelection(farmer.farmerId)}
+                            className={`px-3 py-1 rounded-md transition-colors duration-200 ${
+                              isSelected 
+                                ? 'bg-[#2ecc71] text-white hover:bg-[#2ecc71]/90' 
+                                : 'border border-[#2ecc71] text-[#2ecc71] hover:bg-[#2ecc71]/10'
+                            }`}
+                          >
+                            {isSelected ? 'Selected' : 'Select'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

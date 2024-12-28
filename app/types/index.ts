@@ -1,17 +1,14 @@
 export interface Farmer {
-  farmerId: number
+  farmerId: string
   farmerName: string
-  supplierId: number
   genderId: number
   farmSize: number
-  locationId: number
-  pointLocationId: number
   latitude: number
   longitude: number
 }
 
 export interface Supplier {
-  id: number
+  id: string
   name: string
   totalFarmSize: number
   totalFarmers: number
