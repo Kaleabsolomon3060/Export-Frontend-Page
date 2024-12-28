@@ -15,8 +15,14 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState({ name: '', size: '' })
   const [searchResults, setSearchResults] = useState<Supplier[]>([])
   const [selectedFarmers, setSelectedFarmers] = useState<string[]>([])
+  const [exportedFarmers, setExportedFarmers] = useState<string[]>([])
 
   const handleSearch = () => {
+    // Don't search if both fields are empty
+    if (!searchTerm.name && !searchTerm.size) {
+      return;
+    }
+
     const filteredResults = mockSuppliers.filter(supplier => {
       const nameMatch = supplier.name.toLowerCase().includes(searchTerm.name.toLowerCase())
       const sizeMatch = searchTerm.size ? supplier.totalFarmSize.toString().includes(searchTerm.size) : true
@@ -27,6 +33,9 @@ export default function DashboardPage() {
     setShowResults(true)
     setShowSearchForm(false)
     setShowSupplierDetails(false)
+    
+    // Reset search terms after search
+    setSearchTerm({ name: '', size: '' })
   }
 
   const handleSupplierClick = (supplier: Supplier) => {
@@ -36,6 +45,10 @@ export default function DashboardPage() {
   }
 
   const handleFarmerSelection = (farmerId: string) => {
+    if (exportedFarmers.includes(farmerId)) {
+      return; // Prevent selection if already exported
+    }
+    
     setSelectedFarmers(prev => 
       prev.includes(farmerId) 
         ? prev.filter(id => id !== farmerId)
@@ -70,6 +83,10 @@ export default function DashboardPage() {
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(url)
+
+    // After successful export, update exported farmers list
+    setExportedFarmers(prev => [...prev, ...selectedFarmers])
+    setSelectedFarmers([]) // Clear current selections
   }
 
   return (
@@ -186,10 +203,10 @@ export default function DashboardPage() {
           <div className="bg-[#1a2633] border border-[#44bcd8]/30 rounded-lg p-6 w-full max-w-xl
             shadow-[0_0_25px_rgba(68,188,216,0.25)] animate-fade-in">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Search</h2>
+              <h2 className="text-xl font-semibold text-[#44bcd8]">Search</h2>
               <button 
                 onClick={() => setShowSearchForm(false)}
-                className="text-gray-400 hover:text-gray-500 transition-colors duration-200"
+                className="text-[#44bcd8]/80 hover:text-[#44bcd8] transition-colors duration-200"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -198,31 +215,38 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+                <label className="block text-sm font-medium text-[#44bcd8]/80 mb-1">Customer Name</label>
                 <input
                   type="text"
                   value={searchTerm.name}
                   onChange={(e) => setSearchTerm({ ...searchTerm, name: e.target.value })}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
-                    focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  className="block w-full px-3 py-2 bg-[#0c141c] border border-[#44bcd8]/30 rounded-md 
+                    text-white placeholder-[#44bcd8]/50
+                    focus:ring-[#44bcd8] focus:border-[#44bcd8] sm:text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Container Size</label>
+                <label className="block text-sm font-medium text-[#44bcd8]/80 mb-1">Container Size</label>
                 <input
                   type="text"
                   value={searchTerm.size}
                   onChange={(e) => setSearchTerm({ ...searchTerm, size: e.target.value })}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
-                    focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                  className="block w-full px-3 py-2 bg-[#0c141c] border border-[#44bcd8]/30 rounded-md 
+                    text-white placeholder-[#44bcd8]/50
+                    focus:ring-[#44bcd8] focus:border-[#44bcd8] sm:text-sm"
                 />
               </div>
               <div className="pt-4">
                 <button
                   onClick={handleSearch}
-                  className="w-full bg-purple-600 text-white py-2 px-4 rounded-md 
-                    hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
-                    focus:ring-purple-500 transition-colors duration-200"
+                  disabled={!searchTerm.name && !searchTerm.size}
+                  className={`w-full py-2 px-4 rounded-md transition-colors duration-200 
+                    ${(!searchTerm.name && !searchTerm.size)
+                      ? 'bg-[#2ecc71]/50 cursor-not-allowed'
+                      : 'bg-[#2ecc71] hover:bg-[#2ecc71]/90'
+                    }
+                    text-white focus:outline-none focus:ring-2 focus:ring-offset-2 
+                    focus:ring-[#2ecc71]`}
                 >
                   Search
                 </button>
@@ -330,15 +354,23 @@ export default function DashboardPage() {
                 <tbody className="bg-[#1a2633] divide-y divide-[#44bcd8]/10">
                   {selectedSupplier.farmers.map((farmer) => {
                     const isSelected = selectedFarmers.includes(farmer.farmerId);
+                    const isExported = exportedFarmers.includes(farmer.farmerId);
+                    
                     return (
                       <tr 
                         key={farmer.farmerId}
-                        className={`${isSelected ? 'bg-[#2ecc71]/10' : ''} transition-colors duration-200`}
+                        className={`${isSelected ? 'bg-[#2ecc71]/10' : ''} 
+                          ${isExported ? 'opacity-50' : ''} 
+                          transition-colors duration-200`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.farmerId}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white flex items-center gap-2">
                           {farmer.farmerName}
-                          {isSelected && (
+                          {isExported ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#44bcd8]/20 text-[#44bcd8]">
+                              Exported
+                            </span>
+                          ) : isSelected && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#2ecc71]/20 text-[#2ecc71]">
                               Selected
                             </span>
@@ -347,22 +379,23 @@ export default function DashboardPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">
                           {farmer.genderId === 1 ? 'Male' : 'Female'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">
-                          {farmer.farmSize} ha
-                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">{farmer.farmSize} ha</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">
                           {farmer.latitude}, {farmer.longitude}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <button
                             onClick={() => handleFarmerSelection(farmer.farmerId)}
+                            disabled={isExported}
                             className={`px-3 py-1 rounded-md transition-colors duration-200 ${
-                              isSelected 
-                                ? 'bg-[#2ecc71] text-white hover:bg-[#2ecc71]/90' 
-                                : 'border border-[#2ecc71] text-[#2ecc71] hover:bg-[#2ecc71]/10'
+                              isExported
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : isSelected
+                                  ? 'bg-[#2ecc71] text-white hover:bg-[#2ecc71]/90'
+                                  : 'border border-[#2ecc71] text-[#2ecc71] hover:bg-[#2ecc71]/10'
                             }`}
                           >
-                            {isSelected ? 'Selected' : 'Select'}
+                            {isExported ? 'Exported' : isSelected ? 'Selected' : 'Select'}
                           </button>
                         </td>
                       </tr>

@@ -48,12 +48,25 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Clear any existing errors first
+    setErrors({})
+    
+    // Check if fields are empty before running full validation
+    if (!formData.email && !formData.password) {
+      setErrors({
+        email: 'Email is required',
+        password: 'Password is required',
+        general: 'Please fill in all required fields'
+      })
+      return
+    }
+    
     if (!validateForm()) return
     
     setIsLoading(true)
     try {
       await login(formData.email, formData.password)
-      // Login function will handle redirect
     } catch (error) {
       setErrors({
         general: 'Failed to login. Please try again.'
