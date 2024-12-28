@@ -69,24 +69,12 @@ export default function LoginPage() {
       <div className="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8 p-8 border border-[#44bcd8]/30 rounded-lg
           shadow-[0_0_15px_rgba(68,188,216,0.15)] backdrop-blur-sm">
-          {/* Navigation Buttons */}
-          <div className="flex justify-center space-x-4">
-            <Link
-              href="/login"
-              className="px-8 py-2 text-[#44bcd8] border-2 border-[#44bcd8] rounded-lg 
-                hover:bg-[#44bcd8]/10 transition-all duration-200 
-                hover:shadow-[0_0_15px_rgba(68,188,216,0.3)]"
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="px-8 py-2 text-[#2ecc71] border-2 border-[#2ecc71] rounded-lg 
-                hover:bg-[#2ecc71]/10 transition-all duration-200 
-                hover:shadow-[0_0_15px_rgba(46,204,113,0.3)]"
-            >
-              Sign Up
-            </Link>
+          {/* Welcome Text - Replacing Navigation Buttons */}
+          <div className="text-center space-y-2 mb-8">
+            <h2 className="text-2xl font-bold text-[#44bcd8]">Welcome to NSPF</h2>
+            <p className="text-gray-400">
+            Please sign in to your account to continue
+            </p>
           </div>
 
           {/* Form */}

@@ -88,7 +88,7 @@ export default function HamburgerMenu() {
             </div>
           </div>
 
-          <nav className="p-4 space-y-2">
+          <nav className="p-4 space-y-4">
             <Link
               href="/"
               className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
@@ -96,20 +96,18 @@ export default function HamburgerMenu() {
             >
               Home
             </Link>
-            <Link
-              href="/login"
-              className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
-              onClick={() => setIsOpen(false)}
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
-              onClick={() => setIsOpen(false)}
-            >
-              Sign Up
-            </Link>
+            <div className="px-4 py-2">
+              <h3 className="text-[#44bcd8] font-medium mb-2">Welcome to NSPF</h3>
+              <p className="text-sm text-gray-600">
+                Access the paint management system to track inventory, manage orders, and monitor production.
+              </p>
+            </div>
+            <div className="px-4 py-2">
+              <h3 className="text-[#2ecc71] font-medium mb-2">System Access</h3>
+              <p className="text-sm text-gray-600">
+                Please contact your administrator for system access and credentials.
+              </p>
+            </div>
           </nav>
         </div>
       </div>
