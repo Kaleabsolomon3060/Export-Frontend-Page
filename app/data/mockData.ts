@@ -26,7 +26,13 @@ export const mockSuppliers = [
     totalFarmers: 28,
     farmers: [
       { farmerId: 'F301', farmerName: 'Dawit Mengistu', genderId: 1, farmSize: 30, latitude: 9.0400, longitude: 38.7700 },
-      { farmerId: 'F302', farmerName: 'Bethlehem Tadesse', genderId: 2, farmSize: 22, latitude: 9.0500, longitude: 38.7800 }
+      { farmerId: 'F302', farmerName: 'Bethlehem Tadesse', genderId: 2, farmSize: 22, latitude: 9.0500, longitude: 38.7800 },
+      { farmerId: 'F303', farmerName: 'Yohannes Gebre', genderId: 1, farmSize: 25, latitude: 9.0450, longitude: 38.7750 },
+      { farmerId: 'F304', farmerName: 'Hirut Desta', genderId: 2, farmSize: 28, latitude: 9.0480, longitude: 38.7780 },
+      { farmerId: 'F305', farmerName: 'Solomon Tekle', genderId: 1, farmSize: 24, latitude: 9.0460, longitude: 38.7760 },
+      { farmerId: 'F306', farmerName: 'Tsehay Bogale', genderId: 2, farmSize: 26, latitude: 9.0470, longitude: 38.7770 },
+      { farmerId: 'F307', farmerName: 'Getachew Assefa', genderId: 1, farmSize: 23, latitude: 9.0490, longitude: 38.7790 },
+      { farmerId: 'F308', farmerName: 'Martha Wolde', genderId: 2, farmSize: 27, latitude: 9.0510, longitude: 38.7810 }
     ]
   },
   {
@@ -36,7 +42,13 @@ export const mockSuppliers = [
     totalFarmers: 18,
     farmers: [
       { farmerId: 'F401', farmerName: 'Yonas Bekele', genderId: 1, farmSize: 28, latitude: 9.0600, longitude: 38.7900 },
-      { farmerId: 'F402', farmerName: 'Hiwot Solomon', genderId: 2, farmSize: 16, latitude: 9.0700, longitude: 38.8000 }
+      { farmerId: 'F402', farmerName: 'Hiwot Solomon', genderId: 2, farmSize: 16, latitude: 9.0700, longitude: 38.8000 },
+      { farmerId: 'F403', farmerName: 'Mulugeta Tsegaye', genderId: 1, farmSize: 19, latitude: 9.0650, longitude: 38.7950 },
+      { farmerId: 'F404', farmerName: 'Selamawit Hailu', genderId: 2, farmSize: 21, latitude: 9.0680, longitude: 38.7980 },
+      { farmerId: 'F405', farmerName: 'Tesfaye Wolde', genderId: 1, farmSize: 18, latitude: 9.0660, longitude: 38.7960 },
+      { farmerId: 'F406', farmerName: 'Almaz Tadesse', genderId: 2, farmSize: 20, latitude: 9.0670, longitude: 38.7970 },
+      { farmerId: 'F407', farmerName: 'Berhanu Degu', genderId: 1, farmSize: 22, latitude: 9.0690, longitude: 38.7990 },
+      { farmerId: 'F408', farmerName: 'Zenebech Assefa', genderId: 2, farmSize: 17, latitude: 9.0710, longitude: 38.8010 }
     ]
   },
   {

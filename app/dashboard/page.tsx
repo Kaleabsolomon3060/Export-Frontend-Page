@@ -19,6 +19,8 @@ export default function DashboardPage() {
   const [requiredContainerSize, setRequiredContainerSize] = useState(0)
   const [totalFarmSize, setTotalFarmSize] = useState(0)
   const [showExportModal, setShowExportModal] = useState(false)
+  const [showSizeWarning, setShowSizeWarning] = useState(false)
+  const [warningMessage, setWarningMessage] = useState('')
 
   const handleSearch = () => {
     if (!searchTerm.name) {
@@ -48,12 +50,25 @@ export default function DashboardPage() {
     if (exportedFarmers.includes(farmerId)) {
       return; // Prevent selection if already exported
     }
+
+    const farmerToAdd = selectedSupplier?.farmers.find(f => f.farmerId === farmerId);
+    if (!farmerToAdd) return;
+
+    const requiredSizeInHectares = Number(calculateRequiredFarmSize(requiredContainerSize));
+    const newTotalSize = selectedFarmers.includes(farmerId)
+      ? totalFarmSize - farmerToAdd.farmSize
+      : totalFarmSize + farmerToAdd.farmSize;
+
+    if (newTotalSize > requiredSizeInHectares) {
+      alert('Required Farm Unit Size would be exceeded. Cannot select more farmers.');
+      return;
+    }
     
     setSelectedFarmers(prev => 
       prev.includes(farmerId) 
         ? prev.filter(id => id !== farmerId)
         : [...prev, farmerId]
-    )
+    );
   }
 
   const handleExportClick = () => {
@@ -118,6 +133,19 @@ export default function DashboardPage() {
   useEffect(() => {
     setTotalFarmSize(calculateTotalFarmSize());
   }, [selectedFarmers, selectedSupplier]);
+
+  useEffect(() => {
+    const requiredSizeInHectares = Number(calculateRequiredFarmSize(requiredContainerSize));
+    if (totalFarmSize === requiredSizeInHectares) {
+      setWarningMessage('Required Farm Unit Size reached. Cannot select more farmers.');
+      setShowSizeWarning(true);
+    } else if (totalFarmSize > requiredSizeInHectares) {
+      setWarningMessage('Required Farm Unit Size would be exceeded. Cannot select more farmers.');
+      setShowSizeWarning(true);
+    } else {
+      setShowSizeWarning(false);
+    }
+  }, [totalFarmSize, requiredContainerSize]);
 
   return (
     <div className="space-y-8">
