@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [exportedFarmers, setExportedFarmers] = useState<string[]>([])
   const [requiredContainerSize, setRequiredContainerSize] = useState(0)
   const [totalFarmSize, setTotalFarmSize] = useState(0)
+  const [showExportModal, setShowExportModal] = useState(false)
 
   const handleSearch = () => {
     if (!searchTerm.name) {
@@ -55,37 +56,50 @@ export default function DashboardPage() {
     )
   }
 
-  const handleExport = () => {
+  const handleExportClick = () => {
+    setShowExportModal(true)
+  }
+
+  const handleExportFormat = (format: 'csv' | 'json') => {
     const selectedFarmerData = selectedSupplier?.farmers.filter(farmer => 
       selectedFarmers.includes(farmer.farmerId)
     )
-    
-    // Create CSV content
-    const csvContent = [
-      ['Farmer ID', 'Name', 'Gender', 'Farm Size (ha)', 'Location'],
-      ...selectedFarmerData!.map(farmer => [
-        farmer.farmerId,
-        farmer.farmerName,
-        farmer.genderId === 1 ? 'Male' : 'Female',
-        farmer.farmSize.toString(),
-        `${farmer.latitude}, ${farmer.longitude}`
-      ])
-    ].map(row => row.join(',')).join('\n')
 
-    // Create and trigger download
-    const blob = new Blob([csvContent], { type: 'text/csv' })
+    if (format === 'csv') {
+      // Create CSV content
+      const csvContent = [
+        ['Farmer ID', 'Name', 'Gender', 'Farm Size (ha)', 'Location'],
+        ...selectedFarmerData!.map(farmer => [
+          farmer.farmerId,
+          farmer.farmerName,
+          farmer.genderId === 1 ? 'Male' : 'Female',
+          farmer.farmSize.toString(),
+          `${farmer.latitude}, ${farmer.longitude}`
+        ])
+      ].map(row => row.join(',')).join('\n')
+
+      downloadFile(csvContent, `${selectedSupplier?.name}_selected_farmers.csv`, 'text/csv')
+    } else {
+      // Create JSON content
+      const jsonContent = JSON.stringify(selectedFarmerData, null, 2)
+      downloadFile(jsonContent, `${selectedSupplier?.name}_selected_farmers.json`, 'application/json')
+    }
+
+    setShowExportModal(false)
+    setExportedFarmers(prev => [...prev, ...selectedFarmers])
+    setSelectedFarmers([])
+  }
+
+  const downloadFile = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${selectedSupplier?.name}_selected_farmers.csv`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(url)
-
-    // After successful export, update exported farmers list
-    setExportedFarmers(prev => [...prev, ...selectedFarmers])
-    setSelectedFarmers([]) // Clear current selections
   }
 
   const calculateTotalFarmSize = () => {
@@ -376,7 +390,7 @@ export default function DashboardPage() {
                     Undo All
                   </button>
                   <button
-                    onClick={handleExport}
+                    onClick={handleExportClick}
                     className="px-4 py-2 bg-[#2ecc71] text-white rounded-lg
                       hover:bg-[#2ecc71]/90 transition-colors duration-200"
                     disabled={selectedFarmers.length === 0}
@@ -448,6 +462,52 @@ export default function DashboardPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export Format Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1a2633] border border-[#44bcd8]/30 rounded-lg p-6 w-full max-w-md
+            shadow-[0_0_25px_rgba(68,188,216,0.25)] animate-fade-in">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-[#44bcd8]">Choose Export Format</h2>
+              <button 
+                onClick={() => setShowExportModal(false)}
+                className="text-[#44bcd8]/80 hover:text-[#44bcd8] transition-colors duration-200"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => handleExportFormat('csv')}
+                className="flex flex-col items-center gap-3 p-4 bg-[#0c141c] border border-[#44bcd8]/30 
+                  rounded-lg hover:bg-[#44bcd8]/10 transition-colors duration-200"
+              >
+                <svg className="h-8 w-8 text-[#44bcd8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-sm font-medium text-[#44bcd8]">CSV Format</span>
+              </button>
+              
+              <button
+                onClick={() => handleExportFormat('json')}
+                className="flex flex-col items-center gap-3 p-4 bg-[#0c141c] border border-[#44bcd8]/30 
+                  rounded-lg hover:bg-[#44bcd8]/10 transition-colors duration-200"
+              >
+                <svg className="h-8 w-8 text-[#44bcd8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <span className="text-sm font-medium text-[#44bcd8]">JSON Format</span>
+              </button>
             </div>
           </div>
         </div>
