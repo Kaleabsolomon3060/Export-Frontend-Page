@@ -5,6 +5,11 @@ export interface Farmer {
   farmSize: number
   latitude: number
   longitude: number
+  containers?: number
+}
+
+export interface SelectedFarmerData extends Farmer {
+  containers: number
 }
 
 export interface Supplier {

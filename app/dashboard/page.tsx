@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { mockSuppliers } from '@/app/data/mockData'
@@ -12,21 +12,21 @@ export default function DashboardPage() {
   const [showResults, setShowResults] = useState(false)
   const [showSupplierDetails, setShowSupplierDetails] = useState(false)
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
-  const [searchTerm, setSearchTerm] = useState({ name: '', size: '' })
+  const [searchTerm, setSearchTerm] = useState({ name: '' })
   const [searchResults, setSearchResults] = useState<Supplier[]>([])
   const [selectedFarmers, setSelectedFarmers] = useState<string[]>([])
   const [exportedFarmers, setExportedFarmers] = useState<string[]>([])
+  const [requiredContainerSize, setRequiredContainerSize] = useState(0)
+  const [totalFarmSize, setTotalFarmSize] = useState(0)
 
   const handleSearch = () => {
-    // Don't search if both fields are empty
-    if (!searchTerm.name && !searchTerm.size) {
+    if (!searchTerm.name) {
       return;
     }
 
     const filteredResults = mockSuppliers.filter(supplier => {
       const nameMatch = supplier.name.toLowerCase().includes(searchTerm.name.toLowerCase())
-      const sizeMatch = searchTerm.size ? supplier.totalFarmSize.toString().includes(searchTerm.size) : true
-      return nameMatch && sizeMatch
+      return nameMatch
     })
     
     setSearchResults(filteredResults)
@@ -34,8 +34,7 @@ export default function DashboardPage() {
     setShowSearchForm(false)
     setShowSupplierDetails(false)
     
-    // Reset search terms after search
-    setSearchTerm({ name: '', size: '' })
+    setSearchTerm({ name: '' })
   }
 
   const handleSupplierClick = (supplier: Supplier) => {
@@ -88,6 +87,23 @@ export default function DashboardPage() {
     setExportedFarmers(prev => [...prev, ...selectedFarmers])
     setSelectedFarmers([]) // Clear current selections
   }
+
+  const calculateTotalFarmSize = () => {
+    if (!selectedSupplier) return 0;
+    
+    return selectedSupplier.farmers
+      .filter(farmer => selectedFarmers.includes(farmer.farmerId))
+      .reduce((total, farmer) => total + farmer.farmSize, 0);
+  };
+
+  const calculateRequiredFarmSize = (containers: number) => {
+    return (containers * 2.6667).toFixed(2);
+  };
+
+  // Update total farm size whenever selected farmers change
+  useEffect(() => {
+    setTotalFarmSize(calculateTotalFarmSize());
+  }, [selectedFarmers, selectedSupplier]);
 
   return (
     <div className="space-y-8">
@@ -225,23 +241,12 @@ export default function DashboardPage() {
                     focus:ring-[#44bcd8] focus:border-[#44bcd8] sm:text-sm"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-[#44bcd8]/80 mb-1">Container Size</label>
-                <input
-                  type="text"
-                  value={searchTerm.size}
-                  onChange={(e) => setSearchTerm({ ...searchTerm, size: e.target.value })}
-                  className="block w-full px-3 py-2 bg-[#0c141c] border border-[#44bcd8]/30 rounded-md 
-                    text-white placeholder-[#44bcd8]/50
-                    focus:ring-[#44bcd8] focus:border-[#44bcd8] sm:text-sm"
-                />
-              </div>
               <div className="pt-4">
                 <button
                   onClick={handleSearch}
-                  disabled={!searchTerm.name && !searchTerm.size}
+                  disabled={!searchTerm.name}
                   className={`w-full py-2 px-4 rounded-md transition-colors duration-200 
-                    ${(!searchTerm.name && !searchTerm.size)
+                    ${!searchTerm.name
                       ? 'bg-[#2ecc71]/50 cursor-not-allowed'
                       : 'bg-[#2ecc71] hover:bg-[#2ecc71]/90'
                     }
@@ -319,9 +324,49 @@ export default function DashboardPage() {
               </button>
             </div>
             <div className="mt-6 flex-1 overflow-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-[#44bcd8]">Farmer Details</h3>
-                <div className="space-x-4">
+              <div className="flex justify-between items-start mb-6">
+                {/* Left side - Title and Metrics */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-lg font-medium text-[#44bcd8]">Farmer Details</h3>
+                  
+                  <div className="flex flex-col gap-3 bg-[#0c141c]/50 p-4 rounded-lg border border-[#44bcd8]/20">
+                    {/* Required Container Size Input */}
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-sm font-medium text-[#44bcd8]/80 min-w-[180px]">Required Container Size:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={requiredContainerSize}
+                        onChange={(e) => setRequiredContainerSize(Number(e.target.value))}
+                        className="w-32 px-3 py-1.5 bg-[#0c141c] border border-[#44bcd8]/30 rounded-md 
+                          text-white placeholder-[#44bcd8]/50 text-sm text-center
+                          focus:ring-[#44bcd8] focus:border-[#44bcd8]"
+                        placeholder=""
+                      />
+                    </div>
+
+                    {/* Required Farm Unit Size Display */}
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-sm font-medium text-[#44bcd8]/80 min-w-[180px]">Required Farm Unit Size:</span>
+                      <span className="w-32 px-3 py-1.5 bg-[#0c141c] border border-[#44bcd8]/30 rounded-md 
+                        text-[#44bcd8] text-sm text-center">
+                        {calculateRequiredFarmSize(requiredContainerSize)} ha
+                      </span>
+                    </div>
+
+                    {/* Selected Farm Unit Size Display */}
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-sm font-medium text-[#44bcd8]/80 min-w-[180px]">Selected Farm Unit Size:</span>
+                      <span className="w-32 px-3 py-1.5 bg-[#0c141c] border border-[#44bcd8]/30 rounded-md 
+                        text-[#2ecc71] text-sm text-center">
+                        {totalFarmSize.toFixed(2)} ha
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right side - Action Buttons */}
+                <div className="flex items-center gap-4">
                   <button
                     onClick={() => setSelectedFarmers([])}
                     className="px-4 py-2 text-[#44bcd8] border border-[#44bcd8] rounded-lg
