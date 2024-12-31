@@ -5,6 +5,141 @@ import { useRouter } from 'next/navigation'
 import { mockSuppliers } from '@/app/data/mockData'
 import { Supplier } from '@/app/types'
 
+// Component definitions
+interface ViewOnlyFarmersListProps {
+  supplier: Supplier;
+  onBack: () => void;
+}
+
+interface ViewOnlySupplierListProps {
+  onSupplierSelect: (supplier: Supplier) => void;
+  suppliers: Supplier[];
+  onClose: () => void;
+}
+const ViewOnlySupplierList: React.FC<ViewOnlySupplierListProps> = ({ 
+  onSupplierSelect, 
+  suppliers,
+  onClose 
+}) => (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="bg-[#1a2633] border border-[#44bcd8]/30 rounded-lg p-6 w-full max-w-7xl h-[90vh]
+      shadow-[0_0_25px_rgba(68,188,216,0.25)] animate-fade-in flex flex-col">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-[#44bcd8]">Supplier List</h2>
+        <button onClick={onClose} className="text-[#44bcd8] hover:text-[#44bcd8]/80">
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <table className="min-w-full divide-y divide-[#44bcd8]/10">
+        <thead className="bg-[#0c141c]/50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Number</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Supplier</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Total Size</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Total Farmers</th>
+          </tr>
+        </thead>
+        <tbody className="bg-[#1a2633] divide-y divide-[#44bcd8]/10">
+          {suppliers.map((supplier, index) => (
+            <tr 
+              key={supplier.id}
+              onClick={() => onSupplierSelect(supplier)}
+              className="hover:bg-[#44bcd8]/5 cursor-pointer transition-colors duration-200"
+            >
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{index + 1}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{supplier.name}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">{supplier.totalFarmSize} ha</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">{supplier.totalFarmers}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+const ViewOnlyFarmersList: React.FC<ViewOnlyFarmersListProps> = ({ supplier, onBack }) => (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="bg-[#1a2633] border border-[#44bcd8]/30 rounded-lg p-6 w-full max-w-7xl h-[90vh]
+      shadow-[0_0_25px_rgba(68,188,216,0.25)] animate-fade-in flex flex-col">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-[#44bcd8]">{supplier.name}</h2>
+        <button onClick={onBack} className="text-[#44bcd8] hover:text-[#44bcd8]/80">
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="mt-6 flex-1 overflow-auto">
+        <div className="flex justify-between items-start mb-6">
+          {/* Left side - Title and Metrics */}
+          <div className="flex flex-col gap-4">
+            <h3 className="text-lg font-medium text-[#44bcd8]">Farmer Details</h3>
+            
+            <div className="flex flex-col gap-3 bg-[#0c141c]/50 p-4 rounded-lg border border-[#44bcd8]/20">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm font-medium text-[#44bcd8]/80 min-w-[180px]">Total Farmers:</span>
+                <span className="w-32 px-3 py-1.5 bg-[#0c141c] border border-[#44bcd8]/30 rounded-md 
+                  text-[#2ecc71] text-sm text-center">
+                  {supplier.totalFarmers}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm font-medium text-[#44bcd8]/80 min-w-[180px]">Total Farm Size:</span>
+                <span className="w-32 px-3 py-1.5 bg-[#0c141c] border border-[#44bcd8]/30 rounded-md 
+                  text-[#2ecc71] text-sm text-center">
+                  {supplier.totalFarmSize} ha
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <table className="min-w-full divide-y divide-[#44bcd8]/10">
+          <thead className="bg-[#0c141c]/50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Code</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Coffee Exporter</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Coffee Supplier</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Farmer's Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Gender</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Location (Kebele)</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Farm Size (ha)</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Geometry Type</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Long</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Lat</th>
+            </tr>
+          </thead>
+          <tbody className="bg-[#1a2633] divide-y divide-[#44bcd8]/10">
+            {supplier.farmers.map((farmer) => (
+              <tr key={farmer.farmerId}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.code}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.coffeeExporter}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.coffeeSupplier}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{farmer.farmerName}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">
+                  {farmer.genderId === 1 ? 'M' : 'F'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.kebele}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">{farmer.farmSize}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.geometryType}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.longitude}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.latitude}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+);
+
+// Main component
 export default function DashboardPage() {
   const router = useRouter()
   const { user } = useAuth()
@@ -21,29 +156,39 @@ export default function DashboardPage() {
   const [showExportModal, setShowExportModal] = useState(false)
   const [showSizeWarning, setShowSizeWarning] = useState(false)
   const [warningMessage, setWarningMessage] = useState('')
+  const [processedSuppliers, setProcessedSuppliers] = useState<Supplier[]>([])
+  const [viewMode, setViewMode] = useState<'suppliers' | 'farmers' | null>(null);
+  const [viewSelectedSupplier, setViewSelectedSupplier] = useState<Supplier | null>(null);
+
+  useEffect(() => {
+    // Initialize processed suppliers when component mounts
+    setProcessedSuppliers(updateSuppliersList(mockSuppliers));
+  }, []);
 
   const handleSearch = () => {
     if (!searchTerm.name) {
       return;
     }
 
-    const filteredResults = mockSuppliers.filter(supplier => {
+    const filteredResults = processedSuppliers.filter(supplier => {
       const nameMatch = supplier.name.toLowerCase().includes(searchTerm.name.toLowerCase())
       return nameMatch
-    })
+    });
     
-    setSearchResults(filteredResults)
-    setShowResults(true)
-    setShowSearchForm(false)
-    setShowSupplierDetails(false)
+    setSearchResults(filteredResults);
+    setShowResults(true);
+    setShowSearchForm(false);
+    setShowSupplierDetails(false);
     
-    setSearchTerm({ name: '' })
-  }
+    setSearchTerm({ name: '' });
+  };
 
   const handleSupplierClick = (supplier: Supplier) => {
-    setSelectedSupplier(supplier)
-    setShowSupplierDetails(true)
-    setShowResults(false)
+    // Ensure we're using the processed supplier data
+    const processedSupplier = processedSuppliers.find(s => s.id === supplier.id);
+    setSelectedSupplier(processedSupplier || supplier);
+    setShowSupplierDetails(true);
+    setShowResults(false);
   }
 
   const handleFarmerSelection = (farmerId: string) => {
@@ -154,6 +299,45 @@ export default function DashboardPage() {
     }
   }, [totalFarmSize, requiredContainerSize]);
 
+  const calculateSupplierTotals = (supplier: Supplier) => {
+    const totalFarmers = supplier.farmers.length;
+    const totalFarmSize = supplier.farmers.reduce((sum, farmer) => sum + farmer.farmSize, 0);
+    
+    // Ensure supplier name in farmers matches the main supplier name
+    const updatedFarmers = supplier.farmers.map(farmer => ({
+      ...farmer,
+      coffeeSupplier: supplier.name // Ensure consistency with supplier name
+    }));
+    
+    return {
+      ...supplier,
+      farmers: updatedFarmers,
+      totalFarmers,
+      totalFarmSize: Number(totalFarmSize.toFixed(2))
+    };
+  };
+
+  const updateSuppliersList = (suppliers: Supplier[]) => {
+    return suppliers.map(calculateSupplierTotals);
+  };
+
+  const handleViewClick = () => {
+    setViewMode('suppliers');
+    setShowSearchForm(false);
+    setShowSupplierDetails(false);
+    setShowResults(false);
+  };
+
+  const handleViewSupplierSelect = (supplier: Supplier) => {
+    setViewSelectedSupplier(supplier);
+    setViewMode('farmers');
+  };
+
+  const handleViewBack = () => {
+    setViewMode('suppliers');
+    setViewSelectedSupplier(null);
+  };
+
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -216,7 +400,7 @@ export default function DashboardPage() {
 
         {/* View Card - Similar structure with green accent */}
         <div 
-          onClick={() => setShowResults(true)}
+          onClick={handleViewClick}
           className="group relative bg-[#1a2633] border border-[#2ecc71]/30 
             rounded-lg overflow-hidden transition-all duration-300 
             hover:shadow-[0_0_25px_rgba(46,204,113,0.25)]"
@@ -334,7 +518,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="bg-[#1a2633] divide-y divide-[#44bcd8]/10">
-                {(searchResults.length > 0 ? searchResults : mockSuppliers).map((supplier, index) => (
+                {(searchResults.length > 0 ? searchResults : processedSuppliers).map((supplier, index) => (
                   <tr 
                     key={supplier.id}
                     onClick={() => handleSupplierClick(supplier)}
@@ -543,6 +727,21 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {viewMode === 'suppliers' && (
+        <ViewOnlySupplierList 
+          onSupplierSelect={handleViewSupplierSelect}
+          suppliers={processedSuppliers}
+          onClose={() => setViewMode(null)}
+        />
+      )}
+
+      {viewMode === 'farmers' && viewSelectedSupplier && (
+        <ViewOnlyFarmersList 
+          supplier={viewSelectedSupplier} 
+          onBack={handleViewBack}
+        />
       )}
     </div>
   )
