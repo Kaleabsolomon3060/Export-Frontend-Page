@@ -5,6 +5,11 @@ export interface Farmer {
   farmSize: number
   latitude: number
   longitude: number
+  code?: string
+  coffeeExporter?: string
+  coffeeSupplier?: string
+  kebele?: string
+  geometryType?: string
   containers?: number
 }
 

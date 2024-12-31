@@ -81,21 +81,28 @@ export default function DashboardPage() {
     )
 
     if (format === 'csv') {
-      // Create CSV content
+      // Updated CSV headers to match table columns
       const csvContent = [
-        ['Farmer ID', 'Name', 'Gender', 'Farm Size (ha)', 'Location'],
+        ['Code', 'Coffee Exporter', 'Coffee Supplier', 'Farmer ID', 'Name', 'Gender', 
+         'Location (Kebele)', 'Farm Size (ha)', 'Geometry Type', 'Longitude', 'Latitude'],
         ...selectedFarmerData!.map(farmer => [
+          farmer.code,
+          farmer.coffeeExporter,
+          farmer.coffeeSupplier,
           farmer.farmerId,
           farmer.farmerName,
-          farmer.genderId === 1 ? 'Male' : 'Female',
+          farmer.genderId === 1 ? 'M' : 'F',
+          farmer.kebele,
           farmer.farmSize.toString(),
-          `${farmer.latitude}, ${farmer.longitude}`
+          farmer.geometryType,
+          farmer.longitude,
+          farmer.latitude
         ])
       ].map(row => row.join(',')).join('\n')
 
       downloadFile(csvContent, `${selectedSupplier?.name}_selected_farmers.csv`, 'text/csv')
     } else {
-      // Create JSON content
+      // JSON format already includes all data
       const jsonContent = JSON.stringify(selectedFarmerData, null, 2)
       downloadFile(jsonContent, `${selectedSupplier?.name}_selected_farmers.json`, 'application/json')
     }
@@ -430,11 +437,16 @@ export default function DashboardPage() {
               <table className="min-w-full divide-y divide-[#44bcd8]/10">
                 <thead className="bg-[#0c141c]/50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Farmer ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Code</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Coffee Exporter</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Coffee Supplier</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Farmer's Name</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Gender</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Farm Size</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Location</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Location (Kebele)</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Farm Size (ha)</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Geometry Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Long</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Lat</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#44bcd8] uppercase tracking-wider">Action</th>
                   </tr>
                 </thead>
@@ -450,26 +462,18 @@ export default function DashboardPage() {
                           ${isExported ? 'opacity-50' : ''} 
                           transition-colors duration-200`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.farmerId}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white flex items-center gap-2">
-                          {farmer.farmerName}
-                          {isExported ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#44bcd8]/20 text-[#44bcd8]">
-                              Exported
-                            </span>
-                          ) : isSelected && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#2ecc71]/20 text-[#2ecc71]">
-                              Selected
-                            </span>
-                          )}
-                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.code}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.coffeeExporter}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.coffeeSupplier}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{farmer.farmerName}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">
-                          {farmer.genderId === 1 ? 'Male' : 'Female'}
+                          {farmer.genderId === 1 ? 'M' : 'F'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">{farmer.farmSize} ha</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">
-                          {farmer.latitude}, {farmer.longitude}
-                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.kebele}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2ecc71]">{farmer.farmSize}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.geometryType}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.longitude}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#44bcd8]/80">{farmer.latitude}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <button
                             onClick={() => handleFarmerSelection(farmer.farmerId)}
